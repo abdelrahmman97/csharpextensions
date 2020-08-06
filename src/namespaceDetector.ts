@@ -22,7 +22,7 @@ export default class NamespaceDetector {
             return fullNamespace;
         }
 
-        return this.fromFilepath();
+        return await this.fromFilepath();
     }
 
     private async fromCsproj(): Promise<string | undefined> {
@@ -58,9 +58,30 @@ export default class NamespaceDetector {
         return this.calculateFullNamespace(rootNamespace, projectJsonDir);
     }
 
-    private fromFilepath(): string {
-        const rootPath = workspace.workspaceFolders && workspace.workspaceFolders.length ? workspace.workspaceFolders[0].uri.fsPath : '';
+    private async getRootPath(): Promise<string> {
+        const csprojs: string[] = await findupglob('*.csproj', { cwd: path.dirname(this.filePath) });
+
+        if (csprojs !== null && csprojs.length >= 1) {
+            const csprojSplit = csprojs[0].split(path.sep);
+
+            return csprojSplit.slice(0, csprojSplit.length - 2).join(path.sep);
+        }
+
+        const jsonFiles: string[] = await findupglob('project.json', { cwd: path.dirname(this.filePath) });
+
+        if (jsonFiles !== null && jsonFiles.length >= 1) {
+            const jsonSplit = jsonFiles[0].split(path.sep);
+
+            return jsonSplit.slice(0, jsonSplit.length - 2).join(path.sep);
+        }
+
+        return workspace.workspaceFolders && workspace.workspaceFolders.length ? workspace.workspaceFolders[0].uri.fsPath : '';
+    }
+
+    private async fromFilepath(): Promise<string> {
+        const rootPath = await this.getRootPath();
         const namespaceWithLeadingDot = this.calculateFullNamespace('', rootPath)
+
         return namespaceWithLeadingDot.slice(1);
     }
 
