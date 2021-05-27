@@ -1,5 +1,3 @@
-# Customized version of https://github.com/KreativJos/csharpextensions, -> https://github.com/abdelrahmman97/csharpextensions
-
 # C# Extensions
 
 Welcome to C# Extensions.  This VSCode extension provides extensions to the IDE that will hopefully speed up your development workflow.
